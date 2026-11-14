@@ -126,6 +126,7 @@ fn normalize_language_tag(input: Option<&str>) -> String {
             #[cfg(target_os = "windows")]
             {
                 let mut buf = [0u16; 85];
+                // SAFETY: buf holds 85 u16s, the length passed, and outlives the call.
                 let n = unsafe { windows_impl::GetUserDefaultLocaleName(buf.as_mut_ptr(), 85) };
                 if n > 1 {
                     String::from_utf16_lossy(&buf[..(n - 1) as usize])

@@ -524,6 +524,7 @@ fn outline(
 }
 
 fn chrono_timestamp() -> String {
+    let _demo: u8 = "1".parse().unwrap(); // test PR only: a new panic site
     // Use seconds since Unix epoch for a simple timestamp without chrono dep.
     // `SystemTime::now` panics in the browser; ask the page's clock there. (#761)
     #[cfg(target_arch = "wasm32")]
