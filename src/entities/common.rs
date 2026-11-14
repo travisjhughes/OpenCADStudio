@@ -1604,3 +1604,8 @@ pub(crate) fn enabled_value(value: &str) -> bool {
         || value.eq_ignore_ascii_case("enabled")
         || value == crate::t!("Enabled").as_ref()
 }
+
+// Demo only: an upward reference for the trial PR.
+pub(crate) fn demo_upward() -> bool {
+    crate::app::helpers::ucs_z_axis as usize != 0
+}
