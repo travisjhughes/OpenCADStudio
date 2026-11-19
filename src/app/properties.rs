@@ -7187,3 +7187,9 @@ mod custom_class_title_tests {
         assert_eq!(title, "Line");
     }
 }
+
+/// Probe for the direct read guard: not for merge.
+#[allow(dead_code)]
+fn guard_probe(path: &std::path::Path) -> Option<Vec<u8>> {
+    std::fs::read(path).ok()
+}
