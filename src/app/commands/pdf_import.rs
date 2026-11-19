@@ -1644,6 +1644,58 @@ mod pdfimport_tests {
         assert_eq!(texts, ["Hello PDF", "Tilted"]);
     }
 
+    #[test]
+    fn zz_probe_windows_like_paths() {
+        let path = inkscape();
+        eprintln!(
+            "PROBE path={path:?} exists={}",
+            std::path::Path::new(&path).is_file()
+        );
+        let mut app = new_app();
+        let i = app.active_tab;
+        let cmd = format!(
+            r#"{{"op":"run","cmd":"-PDFIMPORT F \"{}\" 1 5,5 3 0"}}"#,
+            path.replace('\\', "\\\\")
+        );
+        eprintln!("PROBE request={cmd}");
+        let response = app.automation_op(&cmd);
+        eprintln!(
+            "PROBE script undo={} response={response}",
+            app.tabs[i].history.undo_stack.len()
+        );
+        for line in history(&app).lines() {
+            eprintln!("PROBE history: {line}");
+        }
+        let mut app = new_app();
+        let i = app.active_tab;
+        let _ = app.update(Message::Command("-PDFIMPORT".to_string()));
+        for input in [
+            StepInput::Text("F".to_string()),
+            StepInput::Text(format!("\"{path}\"")),
+            StepInput::Text("1".to_string()),
+        ] {
+            let task = app.feed_command(input);
+            app.drive_headless_task(task).expect("task");
+        }
+        eprintln!(
+            "PROBE step-quoted undo={} active={}",
+            app.tabs[i].history.undo_stack.len(),
+            app.tabs[i].active_cmd.is_some()
+        );
+        for line in history(&app).lines() {
+            eprintln!("PROBE history2: {line}");
+        }
+        let mut app = new_app();
+        let _ = app.update(Message::Command("-PDFIMPORT".to_string()));
+        let task = app.feed_command(StepInput::Text("F".to_string()));
+        app.drive_headless_task(task).expect("task");
+        let task = app.feed_active_cmd(&path);
+        app.drive_headless_task(task).expect("task");
+        for line in history(&app).lines() {
+            eprintln!("PROBE history3 (feed_active_cmd): {line}");
+        }
+    }
+
     /// A script line whose file needs a password keeps its answers while
     /// the password window is open; cancelling the window drops them, so
     /// they do not go to the next file name.
