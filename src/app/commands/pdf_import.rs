@@ -1638,7 +1638,12 @@ mod pdfimport_tests {
             r#"{{"op":"run","cmd":"-PDFIMPORT F \"{path}\" 1 5,5 3 0"}}"#
         ));
         assert!(app.tabs[i].active_cmd.is_none(), "{response}");
-        assert_eq!(app.tabs[i].history.undo_stack.len(), 1);
+        assert_eq!(
+            app.tabs[i].history.undo_stack.len(),
+            1,
+            "PROBE-FAIL response={response}\nhistory:\n{}",
+            history(&app)
+        );
         let (mut texts, _) = content(&app);
         texts.sort();
         assert_eq!(texts, ["Hello PDF", "Tilted"]);
@@ -1709,11 +1714,16 @@ mod pdfimport_tests {
             /O <95fe1f4219662a774442fb072e3d9f19e9d130ec09a4d0061e78fe920f7ab62f> \
             /U <0102030405060708090a0b0c0d0e0f100102030405060708090a0b0c0d0e0f10> /P -44 >> >>\n%%EOF\n";
         std::fs::write(&path, file).expect("write the locked file");
-        let _ = app.automation_op(&format!(
+        let response = app.automation_op(&format!(
             r#"{{"op":"run","cmd":"-PDFIMPORT F \"{}\" 1 5,5 3 0"}}"#,
             path.to_string_lossy().replace('\\', "\\\\")
         ));
-        assert_eq!(app.active_modal, Some(crate::app::ModalKind::PdfPassword));
+        assert_eq!(
+            app.active_modal,
+            Some(crate::app::ModalKind::PdfPassword),
+            "PROBE-FAIL response={response}\nhistory:\n{}",
+            history(&app)
+        );
         assert!(
             app.tabs[i].pending_pause_tokens.is_some(),
             "the answers wait"

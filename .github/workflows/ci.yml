@@ -17,7 +17,13 @@ jobs:
         with:
           toolchain: stable
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
-      - name: probe
+      - name: probe, the module in parallel
         env:
           LC_ALL: C
-        run: cargo test --locked --lib -- pdf_import::pdfimport_tests --nocapture --test-threads=1
+        run: cargo test --locked --lib -- pdf_import::pdfimport_tests
+        continue-on-error: true
+      - name: probe, the whole library in parallel
+        env:
+          LC_ALL: C
+        run: cargo test --locked --lib
+        continue-on-error: true
